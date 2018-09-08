@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <link rel="stylesheet" href="https://ssl.gstatic.com/docs/script/css/add-ons1.css">
+  <base target="_top">
+</head>
+
+<body>
+  <label for="academic_session">Academic Year</label><input type="text" id="academic_session"><br><br>
+
+  <input type="radio" name="semesterType" value="sem_1" id="odd"> <label for="odd">Odd</label><br>
+  <input type="radio" name="semesterType" value="sem_2" id="even"> <label for="even">Even</label><br>
+  <input type="radio" name="semesterType" value="supplementary" id="supplementary"> <label for="supplementary">Supplementary</label><br><br>
+
+
+  <!--This Reval and makeup is not required. Please do NOT  consider this.-->
+  <input type="radio" name="resultType" value="see" id="see"> <label for="see">SEE</label><br>
+  <input type="radio" name="resultType" value="see_reval" id="see_reval"> <label for="see_reval">SEE Reval</label><br>
+  <input type="radio" name="resultType" value="makeup" id="makeup"> <label for="makeup">Make up</label><br>
+  <input type="radio" name="resultType" value="makeup_reval" id="makeup_reval"> <label for="makeup_reval">Make up Reval</label><br>
+
+  <button class="blue" id="publish">Publish</button>
+  <button id="cancel">Cancel</button>
+
+
+</body>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<script>
+  $(function () {
+    $("#publish").click(validateAndPublish)
+  })
+
+  function validateAndPublish() {
+    var valid = true
+    var academicSessionPatt = /[0-9]{4}-[0-9]{2}/g;
+    var academicSessionVal = $("#academic_session").val
+
+
+  }
+</script>
+
+</html>

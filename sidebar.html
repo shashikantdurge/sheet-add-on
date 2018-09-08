@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <link rel="stylesheet" href="https://ssl.gstatic.com/docs/script/css/add-ons1.css">
+  <base target="_top">
+</head>
+
+<body>
+  <button id="refresh">Refresh</button>
+  <div id="coursesCount">Courses(0)</div>
+  <div id="courses" style="overflow-y:auto; height:180px;"></div>
+  <div id="usNsCount">Students(0)</div>
+  <div id="usNs" style="overflow-y:auto; height:180px;"></div>
+  <button class="blue" id="configureAndPublish">Configure & Publish</button>
+  <div id="error" class="error"></div>
+</body>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<script>
+  $(function () {
+    getUsnsAndCourses();
+    $("#refresh").click(getUsnsAndCourses);
+    $("#configureAndPublish").click(configureAndPublish);
+
+  })
+
+  function configureAndPublish() {
+    google.script.run.withFailureHandler(showError).configureAndPublish()
+  }
+
+  function getUsnsAndCourses() {
+    $('#refresh').prop('disabled', true);
+    $('#configureAndPublish').prop('disabled', true);
+    document.getElementById("error").innerHTML = ""
+    google.script.run.withSuccessHandler(onGetUsnsAndCourses)
+      .withFailureHandler(showError).getUsnsAndCourses()
+  }
+
+  function onGetUsnsAndCourses(coursesUsns) {
+    var courses = coursesUsns[0]
+    var usNs = coursesUsns[1]
+
+    document.getElementById("courses").innerHTML = "";
+    document.getElementById("coursesCount").innerText = "Courses(" + courses.length + ")"
+    for (var i = 0; i < courses.length; i++) {
+      document.getElementById("courses").innerHTML = document.getElementById("courses").innerHTML + "<br>" + courses[i].code
+    }
+
+    document.getElementById("usNs").innerHTML = "";
+    document.getElementById("usNsCount").innerText = "Students(" + usNs.length + ")"
+    for (var i = 0; i < usNs.length; i++) {
+      document.getElementById("usNs").innerHTML = document.getElementById("usNs").innerHTML + "<br>" + usNs[i][1]
+    }
+    $('#refresh').prop('disabled', false);
+    $('#configureAndPublish').prop('disabled', false);
+  }
+
+  function showError(errorMsg) {
+    document.getElementById("error").innerHTML = errorMsg
+    document.getElementById("courses").innerHTML = "";
+    document.getElementById("usNs").innerHTML = "";
+    document.getElementById("coursesCount").innerText = "Courses(0)"
+    document.getElementById("usNsCount").innerText = "Students(0)"
+    $('#refresh').prop('disabled', false);
+  }
+</script>
+
+</html>
