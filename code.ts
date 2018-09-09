@@ -1,5 +1,13 @@
+
+
+
 var exports = exports || {};
 var module = module || { exports: exports };
+const COURSES_IN_EFFECT = "COURSES_IN_EFFECT"
+const USNS_IN_EFFECT = "USNS_IN_EFFECT"
+const DATA_IN_EFFECT = "DATA_IN_EFFECT"
+const SHEET_IN_EFFECT = "SHEET_IN_EFFECT"
+const SHEET_URL = "SHEET_URL"
 function onOpen(e) {
     SpreadsheetApp.getUi().createAddonMenu()
         .addItem('CIE & SEE', 'showSidebar')
@@ -14,19 +22,18 @@ function showSidebar() {
     SpreadsheetApp.getUi().showSidebar(sideBarUi);
 }
 
-function configureAndPublish(){
-  var confUi = HtmlService.createHtmlOutputFromFile('configuration')
-  SpreadsheetApp.getUi().showModalDialog(confUi,"Configure & Publish")
+function configure() {
+    var properties = PropertiesService.getDocumentProperties()
+    var sheetUrl = properties.getProperty(SHEET_URL)
+    if (sheetUrl != null && /PUBLISHING/.test(properties.getProperty(sheetUrl))) {
+        throw Error(properties.getProperty(sheetUrl))
+    }
+    var confUi = HtmlService.createHtmlOutputFromFile('configuration').setWidth(250)
+        .setHeight(250);
+    SpreadsheetApp.getUi().showModalDialog(confUi, "Configure & Publish")
 }
 
 function getUsnsAndCourses() {
-    var coursesProperty = PropertiesService.getDocumentProperties().getProperty("COURSES_IN_EFFECT")
-    try{
-      console.log(JSON.parse(coursesProperty))
-    }catch(err){
-      console.error(err+". Could not parse courses "+coursesProperty)
-    }
-    
     var sheet = SpreadsheetApp.getActiveSheet();
     var data2DArr = sheet.getDataRange().getValues();
     var courses = [];
@@ -67,8 +74,12 @@ function getUsnsAndCourses() {
     Logger.log(usNs);
     console.info("Courses %s", courses)
     console.info("USNs %s", usNs)
-    PropertiesService.getDocumentProperties().setProperty("COURSES_IN_EFFECT",JSON.stringify(courses))
-    return [courses,usNs]
+    PropertiesService.getDocumentProperties().setProperty(COURSES_IN_EFFECT, JSON.stringify(courses))
+    PropertiesService.getDocumentProperties().setProperty(USNS_IN_EFFECT, JSON.stringify(usNs))
+    //PropertiesService.getDocumentProperties().setProperty(DATA_IN_EFFECT, JSON.stringify(data2DArr))
+    PropertiesService.getDocumentProperties().setProperty(SHEET_IN_EFFECT, sheet.getName())
+    PropertiesService.getDocumentProperties().setProperty(SHEET_URL, SpreadsheetApp.getActive().getUrl())
+    return [courses, usNs]
 }
 //returns [i,j] . i=row j=column if found. [-1] otherwise.
 function findFirstMatch(regexp) {
@@ -83,4 +94,29 @@ function findFirstMatch(regexp) {
         }
     }
     return [-1];
+}
+
+
+function validateAndPublish(academicSession: string, semesterType: string) {
+
+    var properties = PropertiesService.getDocumentProperties()
+    var courses = JSON.parse(properties.getProperty(COURSES_IN_EFFECT))
+    var usNs = JSON.parse(properties.getProperty(USNS_IN_EFFECT))
+    // var data = JSON.parse(properties.getProperty(DATA_IN_EFFECT))
+    var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(properties.getProperty(SHEET_IN_EFFECT))
+    var sheetUrl = properties.getProperty(SHEET_URL)
+    var conf = new Configuration(academicSession, semesterType)
+    if (courses == null || usNs == null || sheet == null) {
+        throw Error("PUBLISH FAILED. Refresh and try again.")
+    }
+    var data = sheet.getDataRange().getValues()
+    try {
+        properties.setProperty(sheetUrl, "PUBLISHING, Please wait. Started at " + (new Date().toLocaleString()))
+        publish(usNs, courses, data, conf)
+        properties.setProperty(sheetUrl, "PUBLISH SUCCESSFUL at " + (new Date().toLocaleString()))
+    } catch (err) {
+        properties.setProperty(sheetUrl, "PUBLISH FAILED. Refresh and try again.")
+    }
+    SpreadsheetApp.getUi().alert('Publish status :' + properties.getProperty(SHEET_IN_EFFECT), properties.getProperty(sheetUrl), SpreadsheetApp.getUi().ButtonSet.OK)
+    return properties.getProperty(sheetUrl)
 }

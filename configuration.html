@@ -7,7 +7,7 @@
 </head>
 
 <body>
-  <label for="academic_session">Academic Year</label><input type="text" id="academic_session"><br><br>
+  <label for="academic_session">Academic Year(YYYY-YY)</label><input type="text" id="academic_session"><br><br>
 
   <input type="radio" name="semesterType" value="sem_1" id="odd"> <label for="odd">Odd</label><br>
   <input type="radio" name="semesterType" value="sem_2" id="even"> <label for="even">Even</label><br>
@@ -15,29 +15,65 @@
 
 
   <!--This Reval and makeup is not required. Please do NOT  consider this.-->
-  <input type="radio" name="resultType" value="see" id="see"> <label for="see">SEE</label><br>
-  <input type="radio" name="resultType" value="see_reval" id="see_reval"> <label for="see_reval">SEE Reval</label><br>
-  <input type="radio" name="resultType" value="makeup" id="makeup"> <label for="makeup">Make up</label><br>
-  <input type="radio" name="resultType" value="makeup_reval" id="makeup_reval"> <label for="makeup_reval">Make up Reval</label><br>
+  <!-- <input type="radio" name="resultType" value="see" id="see"> <label for="see">SEE</label><br>
+<input type="radio" name="resultType" value="see_reval" id="see_reval"> <label for="see_reval">SEE Reval</label><br>
+<input type="radio" name="resultType" value="makeup" id="makeup"> <label for="makeup">Make up</label><br>
+<input type="radio" name="resultType" value="makeup_reval" id="makeup_reval"> <label for="makeup_reval">Make up Reval</label><br> -->
 
   <button class="blue" id="publish">Publish</button>
-  <button id="cancel">Cancel</button>
-
-
+  <button id="cancel" onclick="google.script.host.close()">Cancel</button>
+  <div id="error" class="error"></div>
+  <div id="success" class="success"></div>
 </body>
+
+</html>
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
 <script>
+
+
   $(function () {
     $("#publish").click(validateAndPublish)
+    var approxSemType = getApproxSemesterType()
+    var $radios = $('input:radio[name=semesterType]');
+    $radios.filter('[value=' + approxSemType + ']').prop('checked', true);
+
   })
 
   function validateAndPublish() {
+    showError("")
     var valid = true
     var academicSessionPatt = /[0-9]{4}-[0-9]{2}/g;
-    var academicSessionVal = $("#academic_session").val
-
-
+    var academicSessionVal = $("#academic_session").val().toString().trim()
+    if (!academicSessionVal.match(academicSessionPatt)) {
+      showError("Please enter the academic year in \'YYYY-YY\' format.")
+      return
+    }
+    var semesterType = $("input[name='semesterType']:checked").val();
+    showSuccess("Publishing...\nWe'll notify you when it's complete. You can close this window.")
+    google.script.run.withFailureHandler(showError).withSuccessHandler(showSuccess).validateAndPublish(academicSessionVal, semesterType)
   }
-</script>
 
-</html>
+  function getApproxSemesterType() {
+    var date = new Date()
+    var monthIndex = date.getMonth()
+    if (monthIndex >= 7 && monthIndex <= 10) {//Aug-Nov
+      return "supplementary"
+    } else if (monthIndex == 11 || monthIndex <= 3) {//Dec-Apr
+      return "sem_1"
+    } else {//May-Jul
+      return "sem_2"
+    }
+  }
+
+  function showError(msg) {
+    document.getElementById("error").innerText = msg
+  }
+
+  function showSuccess(msg) {
+    document.getElementById("success").innerText = msg
+  }
+
+
+
+
+</script>
