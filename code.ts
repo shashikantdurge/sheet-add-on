@@ -29,7 +29,7 @@ function configure() {
         throw Error(properties.getProperty(sheetUrl))
     }
     var confUi = HtmlService.createHtmlOutputFromFile('configuration').setWidth(250)
-        .setHeight(250);
+        .setHeight(350);
     SpreadsheetApp.getUi().showModalDialog(confUi, "Configure & Publish")
 }
 
@@ -97,7 +97,7 @@ function findFirstMatch(regexp) {
 }
 
 
-function validateAndPublish(academicSession: string, semesterType: string) {
+function validateAndPublish(academicSession: string, semesterType: string, valuationType: string, isMakeUp: boolean) {
 
     var properties = PropertiesService.getDocumentProperties()
     var courses = JSON.parse(properties.getProperty(COURSES_IN_EFFECT))
@@ -105,7 +105,7 @@ function validateAndPublish(academicSession: string, semesterType: string) {
     // var data = JSON.parse(properties.getProperty(DATA_IN_EFFECT))
     var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(properties.getProperty(SHEET_IN_EFFECT))
     var sheetUrl = properties.getProperty(SHEET_URL)
-    var conf = new Configuration(academicSession, semesterType)
+    var conf = new Configuration(academicSession, semesterType, valuationType, isMakeUp)
     if (courses == null || usNs == null || sheet == null) {
         throw Error("PUBLISH FAILED. Refresh and try again.")
     }

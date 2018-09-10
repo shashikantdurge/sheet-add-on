@@ -8,11 +8,12 @@ function publish(usNs: [number, string][], courses: Course[], data: Object[][], 
         let courseDocJson = {}
         let fields = {}
         let fieldPaths = []
-        let name = database + "/documents/academic_marks/" + usn[1] + "/" + conf.academicSession + "_" + conf.semesterType + "/" + course.code
+        let name = database + "/documents/academic_marks/" + usn[1] + "/" + conf.academicSession + "_D_" + conf.semesterType + "/" + course.code
         course.fields.forEach((value) => {
-            fields[value[1]] = { "stringValue": data[usn[0]][value[0]].toString().trim() }
+            var fieldName = conf.isMakeUp ? Configuration.MAKE_UP + "_D_" + conf.valuationType + "_D_" + value[1] : Configuration.MAIN + "_D_" + conf.valuationType + "_D_" + value[1]
+            fields[fieldName] = { "stringValue": data[usn[0]][value[0]].toString().trim() }
+            fieldPaths.push(fieldName)
         })
-        course.fields.forEach((value) => { fieldPaths.push(value[1]) })
         courseDocJson["updateMask"] = { "fieldPaths": fieldPaths }
         courseDocJson["update"] = { "fields": fields, "name": name }
         return courseDocJson

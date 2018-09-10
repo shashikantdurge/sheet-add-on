@@ -7,18 +7,19 @@
 </head>
 
 <body>
-  <label for="academic_session">Academic Year(YYYY-YY)</label><input type="text" id="academic_session"><br><br>
+  <label for="academic_session">Academic Year(YYYY-YY)</label><input type="text" id="academic_session" value="2018-19"><br><br>
 
   <input type="radio" name="semesterType" value="sem_1" id="odd"> <label for="odd">Odd</label><br>
   <input type="radio" name="semesterType" value="sem_2" id="even"> <label for="even">Even</label><br>
   <input type="radio" name="semesterType" value="supplementary" id="supplementary"> <label for="supplementary">Supplementary</label><br><br>
 
+  <input type="checkbox" name="is_make_up" id="is_make_up" value="make_up"> <label for="is_make_up">Make Up</label><br><br>
 
-  <!--This Reval and makeup is not required. Please do NOT  consider this.-->
-  <!-- <input type="radio" name="resultType" value="see" id="see"> <label for="see">SEE</label><br>
-<input type="radio" name="resultType" value="see_reval" id="see_reval"> <label for="see_reval">SEE Reval</label><br>
-<input type="radio" name="resultType" value="makeup" id="makeup"> <label for="makeup">Make up</label><br>
-<input type="radio" name="resultType" value="makeup_reval" id="makeup_reval"> <label for="makeup_reval">Make up Reval</label><br> -->
+  <input type="radio" name="valuationType" value="valuation" id="valuation"> <label for="valuation">Valuation</label><br>
+  <input type="radio" name="valuationType" value="revaluation" id="revaluation"> <label for="revaluation">Revaluation</label><br>
+  <input type="radio" name="valuationType" value="retotaling" id="retotaling"> <label for="retotaling">Retotaling</label><br>
+  <input type="radio" name="valuationType" value="challenge_valuation" id="challenge_valuation"> <label for="challenge_valuation">Challenge
+    Valuation</label><br>
 
   <button class="blue" id="publish">Publish</button>
   <button id="cancel" onclick="google.script.host.close()">Cancel</button>
@@ -34,8 +35,10 @@
   $(function () {
     $("#publish").click(validateAndPublish)
     var approxSemType = getApproxSemesterType()
-    var $radios = $('input:radio[name=semesterType]');
-    $radios.filter('[value=' + approxSemType + ']').prop('checked', true);
+    //$('input:radio[name=semesterType]').filter('[value=' + approxSemType + ']').prop('checked', true);
+    $('input:radio[name=semesterType]').filter('[value=sem_1]').prop('checked', true);
+    $('input:radio[name=valuationType]').filter('[value=valuation]').prop('checked', true);
+
 
   })
 
@@ -48,9 +51,11 @@
       showError("Please enter the academic year in \'YYYY-YY\' format.")
       return
     }
+    var isMakeUp = $("make_up").is(":checked") ? true : false
     var semesterType = $("input[name='semesterType']:checked").val();
+    var valuationType = $("input[name='valuationType']:checked").val();
     showSuccess("Publishing...\nWe'll notify you when it's complete. You can close this window.")
-    google.script.run.withFailureHandler(showError).withSuccessHandler(showSuccess).validateAndPublish(academicSessionVal, semesterType)
+    google.script.run.withFailureHandler(showError).withSuccessHandler(showSuccess).validateAndPublish(academicSessionVal, semesterType, valuationType, isMakeUp)
   }
 
   function getApproxSemesterType() {
