@@ -14,8 +14,13 @@ function publish(usNs: [number, string][], courses: Course[], data: Object[][], 
             fields[fieldName] = { "stringValue": data[usn[0]][value[0]].toString().trim() }
             fieldPaths.push(fieldName)
         })
+        fields[Configuration.COURSE_NAME] = { "stringValue": course.name }
+        fields[Configuration.CREDITS] = { "integerValue": course.credits }
+        fieldPaths.push(Configuration.COURSE_NAME)
+        fieldPaths.push(Configuration.CREDITS)
         courseDocJson["updateMask"] = { "fieldPaths": fieldPaths }
         courseDocJson["update"] = { "fields": fields, "name": name }
+        console.info("COURSE DOC JSON %s", courseDocJson)
         return courseDocJson
     }
     let studentsNum = usNs.length

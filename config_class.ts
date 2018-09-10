@@ -1,6 +1,9 @@
 class Configuration {
     static MAKE_UP: string = "make_up"
     static MAIN: string = "main"
+    static COURSE_NAME = "courseName"
+    static CREDITS = "credits"
+
     academicSession: string
     semesterType: string
     valuationType: string
